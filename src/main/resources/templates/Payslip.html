@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Employee Payslip</title>
+<style>
+.logo-container {
+	width: 200px;
+	height: 100px;
+	background-size: contain;
+	background-repeat: no-repeat;
+	float: left;
+}
+
+.logo-text-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	height: 100px;
+	border: 1px solid black;
+}
+
+.logo-text {
+	font-weight: bold;
+	font-size: 11px;
+	width: 400px; /* Width of the logo text */
+	text-align: right; /* Align the text to the right */
+	margin-bottom: 20px;
+	/* Add gap between the logo text and the content */
+	float: right;
+	height: 70px;
+	padding: 10px;
+}
+
+th, td {
+	padding: 4px 0; /* Top and Bottom padding */
+	text-align: left;
+}
+
+/*    h4 {
+            text-align: center;
+            margin-top: 20px; 
+            margin-bottom: 20px;
+        } */
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+th {
+	font-weight: normal;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.heading-container {
+	border: 1px solid black;
+	padding: 10px;
+}
+
+.outer-table {
+	border: 1px solid black; /* Add a border to the outer table */
+	padding: 50px; /* Add padding to the outer table */
+}
+
+.outer-table th {
+	width: 25.00%; /* Set a fixed width for the th elements */
+}
+
+.first-table {
+	border: 1px solid black; /* Add a border to the outer table */
+	padding: 10px; /* Add padding to the outer table */
+}
+
+.table-container {
+	display: flex; /* Use flexbox to arrange tables side by side */
+}
+
+.table-container table {
+	flex: 1; /* Distribute available space equally among tables */
+}
+
+.separator {
+	border-right: 1px solid black;
+}
+
+@media print {
+	h4 {
+		font-size: 14px; /* Adjust the font size for printing */
+	}
+	th, td {
+		font-size: 11px; /* Adjust the font size for printing */
+	}
+	.logo-text {
+		font-size: 10px; /* Adjust the font size for printing */
+	}
+	.salary-heading {
+		font-size: 13px;
+	}
+}
+
+.table-container {
+	display: flex;
+}
+
+.table-container table {
+	flex: 1; /* Distribute available space equally among tables */
+}
+</style>
+</head>
+<body>
+	<div class="logo-text-container">
+		<div>
+			<div class="logo-container"  th:style="|background-image: url('@{${logoImageUrl}}');|"></div>
+		</div>
+		<div class="logo-text">
+			<p>NU Information Technologies Pvt Ltd</p>
+			<p>Ticel Bio Park Limit, Phase­II, Module­903 CSIR Road Taramani</p>
+			<p>Chennai, Tamil Nadu ­ 600103</p>
+		</div>
+	</div>
+	<div class="heading-container">
+		<h4 style="text-align: center; margin-top: 0;"
+			th:text="${employeeAccountDetail.empname + ' - Payslip for the Month of ' + salarydetails.payslipmonth + ' ' + salarydetails.payslipyear}"></h4>
+	</div>
+
+
+	<div class="table-container">
+		<table class="first-table">
+			<tr>
+				<th>Employee ID</th>
+				<td th:text="*{employeeAccountDetail.empid}"></td>
+				<td class="separator"></td>
+				<!-- Separator -->
+				<th>Account Number</th>
+				<td th:text="*{employeeAccountDetail.accountnumber}"></td>
+			</tr>
+			<tr>
+				<th>Employee Name</th>
+				<td th:text="*{employeeAccountDetail.empname}"></td>
+				<td class="separator"></td>
+				<!-- Separator -->
+				<th>IFSC Code</th>
+				<td th:text="*{employeeAccountDetail.ifsccode}"></td>
+			</tr>
+			<tr>
+				<th>Phone Number</th>
+				<td th:text="*{employeeDetail.phonenumber}"></td>
+				<td class="separator"></td>
+				<!-- Separator -->
+				<th>Bank Name</th>
+				<td th:text="*{employeeAccountDetail.bankname}"></td>
+			</tr>
+			<tr>
+				<th>Joining Date</th>
+				<td th:text="*{employeeDetail.joiningdate}"></td>
+				<td class="separator"></td>
+				<!-- Separator -->
+				<th>PAN Number</th>
+				<td th:text="*{employeeAccountDetail.pannumber}"></td>
+			</tr>
+			<tr>
+				<th>Designation</th>
+				<td th:text="*{employeeDetail.designation}"></td>
+				<td class="separator"></td>
+				<!-- Separator -->
+				<th>UAN Number</th>
+				<td th:text="*{employeeAccountDetail.uannumber}"></td>
+			</tr>
+			<tr>
+				<th>Location</th>
+				<td th:text="*{employeeDetail.location}"></td>
+				<td class="separator"></td>
+				
+				<th>Payable Days</th>
+				<td th:text="*{salarydetails.payabledays}"></td>
+			</tr>
+			<tr>
+				<th>Company Name</th>
+				<td th:text="*{employeeDetail.Companyname}"></td>
+				<td class="separator"></td>
+				<!-- colspan to maintain alignment -->
+				<th>Paid Days</th>
+				<td th:text="*{salarydetails.paidmonth}"></td>
+			</tr>
+			<tr>
+				<th>Date Of Birth</th>
+				<td th:text="*{employeeDetail.dateofbirth}"></td>
+				<td class="separator"></td>
+				<!-- colspan to maintain alignment -->
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>Address</th>
+				<td th:text="*{employeeDetail.address}"></td>
+				<td class="separator"></td>
+				<!-- colspan to maintain alignment -->
+				<th></th>
+				<td></td>
+			</tr>
+
+		</table>
+	</div>
+
+
+	<table class="outer-table">
+		<tr>
+			<td style="width: 50%;">
+				<table>
+					<caption class="salary-heading">
+						<b>Salary Details</b>
+					</caption>
+					<tr  style="border: 1px solid black;">
+						<th style="font-weight: bold;">Head</th>
+						<td style="font-weight: bold;" >Earning</td>
+						<td class="separator"></td>
+			<th style="font-weight: bold;">Head</th>
+						<td style="font-weight: bold;">Deduction</td>
+					</tr>
+					<tr>
+						<th>Basic Pay</th>
+						<td th:text="*{salarydetails.basicpay}"></td>
+						<td class="separator"></td>
+			<th>Provident Fund</th>
+						<td th:text="*{salarydetails.providentfund}"></td>
+					</tr>
+					<tr>
+						<th>House Allowance</th>
+						<td th:text="*{salarydetails.houseallowance}"></td>
+							<td class="separator"></td>
+			                <th>Professional Tax</th>
+						<td th:text="*{salarydetails.professionaltax}"></td>
+					</tr>
+					
+					<tr>
+						<th>Special Allowance</th>
+						<td th:text="*{salarydetails.specialallowance}"></td>
+							<td class="separator"></td>
+							<th>Salary Advance</th>
+						<td th:text="*{salarydetails.salaryadvance}"></td>
+							
+					</tr>
+					<tr>
+						<th>OT Allowance</th>
+						<td th:text="*{salarydetails.otallowance}"></td>
+							<td class="separator"></td>
+					</tr>
+					
+					
+					<tr>
+						<th  style="font-weight: bold;border: 1px solid black;">Total</th>
+						<td  style="font-weight: bold;border: 1px solid black;" th:text="*{salarydetails.total}"></td>
+							<td class="separator"></td>
+							<th  style="font-weight: bold;border: 1px solid black;">Deduction</th>
+						<td  style="font-weight: bold;border: 1px solid black;" th:text="*{salarydetails.deduction}"></td>
+					</tr>
+					
+					<tr >
+						<th style="font-weight: bold;border: 1px solid black;">Net Pay</th>
+						<td th:text="*{salarydetails.netpay}" style="font-weight: bold;border: 1px solid black;"></td>
+					    <td class="separator"></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<I>Note:This is system generated file.</I>
+</body>
+</html>

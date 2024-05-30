@@ -223,5 +223,15 @@ public class Salarydetails {
 		this.total = total;
 	}
 
+	@Override
+	public String toString() {
+		return "Salarydetails [id=" + id + ", payabledays=" + payabledays + ", paidmonth=" + paidmonth + ", deduction="
+				+ deduction + ", total=" + total + ", empid=" + empid + ", basicpay=" + basicpay + ", houseallowance="
+				+ houseallowance + ", specialallowance=" + specialallowance + ", otallowance=" + otallowance
+				+ ", providentfund=" + providentfund + ", professionaltax=" + professionaltax + ", salaryadvance="
+				+ salaryadvance + ", netpay=" + netpay + ", payslipmonth=" + payslipmonth + ", payslipyear="
+				+ payslipyear + "]";
+	}
+
 
 }
