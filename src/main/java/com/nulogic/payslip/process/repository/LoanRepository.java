@@ -2,10 +2,11 @@ package com.nulogic.payslip.process.repository;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 import com.nulogic.payslip.process.model.Loan;
@@ -23,8 +24,8 @@ public interface LoanRepository extends JpaRepository<Loan,Integer> {
 	@Query(value = "SELECT * FROM loan WHERE empid = ?1 AND (loanrequeststatus = ?2 OR loanrequeststatus = ?3)", nativeQuery = true)
 	List<Loan> findByEmpidAndLoanRequestStatus(String empid, String loanRequestOngoing,String loanrequestNotStarted);
 	
-	List<Loan> findByEmpid(String employeeid);
+	Optional<List<Loan>> findByEmpid(String employeeid);
 
-	List<Loan> findByLoanstatusContaining(String status);
+	Optional<List<Loan>> findByLoanstatusContaining(String status);
 
 }
