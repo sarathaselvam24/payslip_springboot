@@ -1,5 +1,6 @@
 package com.nulogic.payslip.process.controller;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -267,6 +268,69 @@ public class EmployeeController {
 	   
 	  
 	}
+	
+	@PostMapping("/api/createEmployee")
+	public ResponseEntity<String> createEmployeeDetails(@RequestBody Map<String, String> request)
+	{
+		
+		String empid = request.get("empid");
+		String name = request.get("name");
+		String email = request.get("email");
+		String phonenumber = request.get("phonenumber");
+		String address = request.get("address");
+		String joiningdate = request.get("joiningdate");
+		String designation = request.get("designation");
+		String location = request.get("location");
+		String companyname = request.get("companyname");
+		String dateofbirth = request.get("dateofbirth");
+		String accountnumber = request.get("accountnumber");
+		String ifsccode = request.get("ifsccode");
+		String bankname = request.get("bankname");
+		String pannumber = request.get("pannumber");
+		String uannumber = request.get("uannumber");
+		String ctc = request.get("ctc");
+		String shift = request.get("shift");
+		
+		if (empid != null) {
+			
+			Employee empobj = new Employee();
+			empobj.setEmpid(empid);
+			empobj.setName(name);
+			empobj.setEmail(email);
+			empobj.setPhonenumber(phonenumber);
+			empobj.setLocation(location);
+			empobj.setAddress(address);
+			empobj.setDesignation(designation);
+			empobj.setCompanyname(companyname);
+			java.sql.Date sqlJoiningDate = java.sql.Date.valueOf(joiningdate);
+			empobj.setJoiningdate(sqlJoiningDate);
+			java.sql.Date sqlDateofbirth = java.sql.Date.valueOf(dateofbirth);
+			empobj.setDateofbirth(sqlDateofbirth);
+			employeeRepository.save(empobj);
+			
+			EmployeeAccountDetails accountDetail = new EmployeeAccountDetails();
+			accountDetail.setAccountnumber(accountnumber);
+			accountDetail.setBankname(bankname);
+			accountDetail.setEmpid(empid);
+			accountDetail.setEmpname(name);
+			accountDetail.setIfsccode(ifsccode);
+			accountDetail.setPannumber(pannumber);
+			accountDetail.setPannumber(uannumber);
+			accountDetailsRepository.save(accountDetail);
+			Basicpay basicpayobj = new Basicpay();
+			basicpayobj.setEmpid(empid);
+			basicpayobj.setEmailid(email);
+			BigDecimal ctc_value = new BigDecimal(ctc);
+			basicpayobj.setCtc(ctc_value);
+			basicpayobj.setShift(shift);
+			basicRepo.save(basicpayobj);
+			return new ResponseEntity<>("Employee Created",HttpStatus.CREATED);
+			
+		}
+		return new ResponseEntity<>("Employee Not Created",HttpStatus.OK);
+		
+	}
+
 
     
     
