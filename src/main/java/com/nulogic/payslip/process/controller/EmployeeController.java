@@ -1,6 +1,5 @@
 package com.nulogic.payslip.process.controller;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +32,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -230,6 +228,8 @@ public class EmployeeController {
 	   
 	}
 	
+	
+	
 	@PostMapping("/api/editEmployeeLoanStatus")
 	public ResponseEntity<Boolean> editEmployeeLoanStatus(@RequestBody Map<String, String> request) {
 		int loanId = Integer.valueOf(request.get("loanid"));
@@ -244,6 +244,27 @@ public class EmployeeController {
 	    	loan.setCanceledby(loanCanceledBy);
 	    }
 	    loanRepo.save(loan);
+	    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+	}
+	
+	@PostMapping("/api/editAdminLoanStatus")
+	public ResponseEntity<Boolean> editAdminLoanStatus(@RequestBody Map<String, String> request) {
+		int loanId = Integer.valueOf(request.get("loanId"));
+			
+		String loanRequestStatus = request.get("loanStatus");
+		String adminemail = request.get("adminEmail");
+	    Loan loan = loanRepo.findById(loanId).orElseThrow(() -> new IllegalArgumentException("Invalid loan Id:" + loanId));
+	    
+	    loan.setLoanstatus(loanRequestStatus);
+	    if(loanRequestStatus.equalsIgnoreCase("approved")) {
+	    	loan.setApprovedby(adminemail);
+	    }else if(loanRequestStatus.equalsIgnoreCase("rejected")) {
+	    	loan.setRejectedby(adminemail);
+	    }else if(loanRequestStatus.equalsIgnoreCase("Canceled")) {
+	    	loan.setCanceledby(adminemail);
+	    }
+	    loanRepo.save(loan);
+	    
 	    return new ResponseEntity<>(HttpStatus.ACCEPTED);
 	}
 	
@@ -263,6 +284,26 @@ public class EmployeeController {
 	    	Optional<List<Loan>> employeeLoanRequestsByStatus = loanRepo.findByLoanstatusContaining(search);
 	    	System.out.println("searchMyLoanRequestByStatus else called "+employeeLoanRequestsByStatus);
 		    return employeeLoanRequestsByStatus.map(ResponseEntity::ok)
+		            .orElseGet(() -> ResponseEntity.notFound().build());
+	    }
+	   
+	  
+	}
+	
+	@PostMapping("/api/searchEmployeeLoanRequestByStatusOrEmpid")
+	public ResponseEntity<List<Loan>> searchEmployeeLoanRequestByStatusOrEmpid(@RequestBody Map<String, String> request) {
+		
+		String search = request.get("searchTerm");
+		System.out.println("search "+search);
+	    if (search == null || search.isEmpty()) {
+	    	Optional<List<Loan>> employeeAllLoanRequests = Optional.ofNullable(loanRepo.findAll());
+	    	System.out.println("searchMyLoanRequestByStatus if called "+employeeAllLoanRequests);
+		    return employeeAllLoanRequests.map(ResponseEntity::ok)
+		            .orElseGet(() -> ResponseEntity.notFound().build());
+	    } else {
+	    	Optional<List<Loan>> employeeLoanRequestsByStatusOrEmpid = loanRepo.findByEmpidContainingOrLoanstatusContaining(search,search);
+	    	System.out.println("employeeLoanRequestsByStatusOrEmpid else called "+employeeLoanRequestsByStatusOrEmpid);
+		    return employeeLoanRequestsByStatusOrEmpid.map(ResponseEntity::ok)
 		            .orElseGet(() -> ResponseEntity.notFound().build());
 	    }
 	   
@@ -330,10 +371,14 @@ public class EmployeeController {
 		return new ResponseEntity<>("Employee Not Created",HttpStatus.OK);
 		
 	}
-
-
-    
-    
+	
+	@GetMapping("/api/allEmployeeLoanRequest")
+	public ResponseEntity<List<Loan>> viewEmployeeLoanRequest() {
+		Optional<List<Loan>> loanreq = Optional.ofNullable(loanRepo.findAll());
+		   
+	    return loanreq.map(ResponseEntity::ok)
+	            .orElseGet(() -> ResponseEntity.notFound().build());
+	}
     
     private String generateHtmlContent(Model model) {
 		Context context = new Context();
