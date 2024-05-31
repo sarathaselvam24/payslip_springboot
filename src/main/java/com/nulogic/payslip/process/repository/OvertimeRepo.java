@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import com.nulogic.payslip.process.model.Overtime;
 
 @Repository
-public interface OvertimeRepo extends JpaRepository<Overtime,String>{
+public interface OvertimeRepo extends JpaRepository<Overtime,Integer>{
 	
 	@Query(value = "SELECT * FROM overtime WHERE month = ?1 AND year =?2 AND empid =?3", nativeQuery = true)
-	Overtime findByEmpid(String month,String year,String employeeid);
+	Overtime exitsOverTime(String month,String year,String employeeid);
 
 }

@@ -40,11 +40,13 @@ import com.nulogic.payslip.process.model.Basicpay;
 import com.nulogic.payslip.process.model.Employee;
 import com.nulogic.payslip.process.model.EmployeeAccountDetails;
 import com.nulogic.payslip.process.model.Loan;
+import com.nulogic.payslip.process.model.Overtime;
 import com.nulogic.payslip.process.model.Salarydetails;
 import com.nulogic.payslip.process.repository.BasicpayRepository;
 import com.nulogic.payslip.process.repository.EmployeeAccountDetailsRepository;
 import com.nulogic.payslip.process.repository.EmployeeRepository;
 import com.nulogic.payslip.process.repository.LoanRepository;
+import com.nulogic.payslip.process.repository.OvertimeRepo;
 import com.nulogic.payslip.process.repository.SalarydetailsRepository;
 
 
@@ -71,6 +73,9 @@ public class EmployeeController {
     
     @Autowired
     private LoanRepository loanRepo;
+    
+    @Autowired
+    private OvertimeRepo overTimeRepo;
 
     public TemplateEngine getTemplateEngine() {
 		return templateEngine;
@@ -378,6 +383,174 @@ public class EmployeeController {
 		   
 	    return loanreq.map(ResponseEntity::ok)
 	            .orElseGet(() -> ResponseEntity.notFound().build());
+	}
+	
+	@PostMapping("/api/generatePayslip")
+	public ResponseEntity<String> generatePaySlipinDB(@RequestBody Map<String, String> request) {
+		
+		String month = request.get("month");
+		String year = request.get("year");
+		BigDecimal payabledays = new BigDecimal(request.get("payabledays"));
+		BigDecimal paiddays = new BigDecimal(request.get("paiddays"));
+		
+		
+		List<Basicpay> emp = basicRepo.findAll();
+		System.out.println("emp " + emp.toString());
+		for (Basicpay employee : emp) {
+			System.out.println("employee  " + employee);
+			Salarydetails details = null;
+			Optional<Salarydetails> sal = salaryRepo.findByPayslip(month, year, employee.getEmpid());
+			System.out.println("sal "+sal);
+			Overtime ot= overTimeRepo.exitsOverTime(month, year, employee.getEmpid());
+			if (sal != null && !sal.isEmpty()) {
+				BigDecimal basicpay = employee.getCtc()
+						.multiply((BigDecimal.valueOf(50)).divide(BigDecimal.valueOf(100)));
+				basicpay = basicpay.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);
+					BigDecimal salaryadvance =  BigDecimal.ZERO;
+				BigDecimal nightshift = BigDecimal.valueOf(0);
+				BigDecimal overtime = BigDecimal.valueOf(0);
+				BigDecimal providentFund = new BigDecimal("1800");
+				BigDecimal houseAllowance = employee.getCtc().multiply(BigDecimal.valueOf(20).divide(BigDecimal.valueOf(100)));
+				houseAllowance=houseAllowance.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);
+				BigDecimal specialAllowance = employee.getCtc().multiply(BigDecimal.valueOf(30).divide(BigDecimal.valueOf(100)));
+				specialAllowance=specialAllowance.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);
+				
+				if (employee.getShift().equalsIgnoreCase("Night")) {
+					nightshift = paiddays.multiply(BigDecimal.valueOf(200));
+				}
+				BigDecimal professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				if (month.equalsIgnoreCase("January")) {
+					professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				}
+				if (month.equalsIgnoreCase("June")) {
+					professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				}
+				if(null != ot) {
+					overtime = ot.getOvertime();
+				}
+				details = new Salarydetails(sal.get().getEmpid(), sal.get().getBasicpay(), sal.get().getHouseallowance(),
+						sal.get().getSpecialallowance(), nightshift, providentFund, professionalTex, salaryadvance,
+						BigDecimal.ZERO, payabledays, paiddays, month, year,overtime);
+				sal.get().setBasicpay(details.getBasicpay());
+				sal.get().setHouseallowance(details.getHouseallowance());
+				sal.get().setSpecialallowance(details.getSpecialallowance());
+				sal.get().setOtallowance(details.getOtallowance());
+				sal.get().setProvidentfund(details.getProvidentfund());
+				sal.get().setProfessionaltax(details.getProfessionaltax());
+				sal.get().setSalaryadvance(details.getSalaryadvance());
+				sal.get().setPayabledays(details.getPayabledays());
+				sal.get().setPaidmonth(details.getPaidmonth());
+				sal.get().setNetpay(details.getNetpay());
+				sal.get().setDeduction(details.getDeduction());
+				sal.get().setTotal(details.getTotal());
+				salaryRepo.save(sal.get());
+				return new ResponseEntity<>("Payslip Generated Successfully!",HttpStatus.CREATED);
+			} else {
+				System.out.println("salaryDetails empId " + employee.getEmpid());
+				System.out.println("employee.toString " + employee.toString());
+				System.out.println("employee.getCtc " + employee.getCtc());
+				BigDecimal basicpay = employee.getCtc()
+						.multiply((BigDecimal.valueOf(50)).divide(BigDecimal.valueOf(100)));
+				System.out.println("basicpay 1 " + basicpay);
+				basicpay = basicpay.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);
+				System.out.println("basicpay 2 " + basicpay);
+				BigDecimal nightshift = BigDecimal.valueOf(0);
+				BigDecimal providentFund = new BigDecimal("1800");
+				BigDecimal houseAllowance = employee.getCtc().multiply(BigDecimal.valueOf(20).divide(BigDecimal.valueOf(100)));
+				houseAllowance=houseAllowance.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);
+				BigDecimal specialAllowance = employee.getCtc().multiply(BigDecimal.valueOf(30).divide(BigDecimal.valueOf(100)));
+				specialAllowance=specialAllowance.divide(BigDecimal.valueOf(12), MathContext.DECIMAL128).setScale(2,
+						RoundingMode.HALF_UP);Overtime otime= overTimeRepo.exitsOverTime(month, year, employee.getEmpid());
+				BigDecimal overtime =  BigDecimal.ZERO;
+				if(otime != null) {
+				 overtime = otime.getOvertime();
+				}
+				 
+				 Loan loanNotStartedReq = loanRepo.findLoanNotStaredrequest(employee.getEmpid(),"Approved","Not Started");
+
+					BigDecimal salaryadvance =  BigDecimal.ZERO;
+				 if(loanNotStartedReq !=null ) {
+					 System.out.println("emifrom "+loanNotStartedReq.getEmistartsfrom());
+					 System.out.println("month "+month);
+					 System.out.println("year "+year);
+					 
+					 System.out.println("formatMonthAndYear(month+\" \"+year) "+formatMonthAndYear(month+" "+year));
+					 
+					int compareDate = loanNotStartedReq.getEmistartsfrom().compareTo(formatMonthAndYear(month+" "+year));
+					
+				 System.out.println("not started compare "+compareDate) ;
+				 
+				 if(compareDate == 0) {
+					 if(loanNotStartedReq.getLoanamount().compareTo(loanNotStartedReq.getRemainingbalance())==0) {
+						 loanNotStartedReq.setLoanrequeststatus("On going");
+						 salaryadvance = loanNotStartedReq.getEmi();
+						 loanRepo.save(loanNotStartedReq);
+					 }
+				 }
+				 }
+
+				Loan loanReq = loanRepo.findLoanrequest(employee.getEmpid(),"Approved","On going",BigDecimal.valueOf(0));
+				if(loanReq != null) {
+					BigDecimal loanrequestRemainingBalance = loanReq.getRemainingbalance().subtract(loanReq.getEmi());
+					loanReq.setRemainingbalance(loanrequestRemainingBalance);
+					if(loanrequestRemainingBalance==BigDecimal.valueOf(0) || ((loanReq.getLoanamount().subtract(loanReq.getEmi().multiply(loanReq.getRepaymentterms()))).compareTo(loanReq.getRemainingbalance()) == 0))  {
+						salaryadvance = loanReq.getEmi();
+						loanReq.setLoanrequeststatus("Completed");
+						loanRepo.save(loanReq);
+					}
+					System.out.println("after salary advance "+basicpay);
+				}
+				System.out.println("loanReq "+loanReq);
+				
+				if (employee.getShift().equalsIgnoreCase("Night")) {
+					nightshift = paiddays.multiply(BigDecimal.valueOf(200));
+				}
+				BigDecimal professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				if (month.equalsIgnoreCase("January")) {
+					professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				}
+				if (month.equalsIgnoreCase("June")) {
+					professionalTex = basicpay.multiply(BigDecimal.valueOf(12).divide(BigDecimal.valueOf(100)));
+				}
+				details = new Salarydetails(employee.getEmpid(), basicpay, houseAllowance, specialAllowance, nightshift,
+						providentFund, professionalTex, salaryadvance, BigDecimal.ZERO, payabledays, paiddays, month,
+						year,overtime);
+				salaryRepo.save(details);
+				return new ResponseEntity<>("Payslip Generated Successfully!",HttpStatus.CREATED);
+			}
+			
+		}
+		return new ResponseEntity<>("No Payslip Generated!",HttpStatus.OK);
+	}
+	
+	@PostMapping("/api/createEmployeeOvertime")
+	public ResponseEntity<String> createEmployeeOverTime(@RequestBody Map<String, String> request) {
+		
+		String empid = request.get("empId");
+		String month = request.get("month");
+		String year = request.get("year");
+		BigDecimal overtime = new BigDecimal( request.get("overtime"));
+		Overtime ot= overTimeRepo.exitsOverTime( month, year,empid);
+		
+		if (ot != null) {
+			ot.setOvertime(overtime);
+			overTimeRepo.save(ot);
+			return new ResponseEntity<>("Already OverTime Added Successfully",HttpStatus.OK);
+			
+		} else {
+			Overtime newOvertimeRecord = new Overtime();
+			newOvertimeRecord.setEmpid(empid);
+			newOvertimeRecord.setMonth(month);
+			newOvertimeRecord.setYear(year);
+			newOvertimeRecord.setOvertime(overtime);
+			overTimeRepo.save(newOvertimeRecord);
+			return new ResponseEntity<>(" OverTime Added Successfully",HttpStatus.CREATED);
+		}
 	}
     
     private String generateHtmlContent(Model model) {
